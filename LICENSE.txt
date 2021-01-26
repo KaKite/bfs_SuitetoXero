@@ -1,0 +1,84 @@
+TERMS AND CONDITIONS.
+
+BY CLICKING THE "I ACCEPT" BOX, BY INSTALLING OR USING THE BUSINESS 
+FUNDAMENTALS SUITE TO XERO ("SOFTWARE"), THE USER EXPRESSLY DECLARES 
+TO HAVE READ AND ACCEPTED ALL THE FOLLOWING TERMS AND CONDITIONS.
+
+1.0 License. The BUSINESS FUNDAMENTALS SUITE TO XERO SOFTWARE has
+been created by:
+
+Business Fundamentals
+New Zealand
+
+(Hereby referred to as "BF").
+
+Copyright (c)  2016 - 2017 BF.
+
+with the collaboration of Taction Software, www.tactionsoftware.com
+
+The SOFTWARE is released by BF under the GNU GENERAL PUBLIC LICENSE 
+version 3 ("GPL3"), whose content is integral part of the SUITECRM(TM) 
+project and is located at the path "LICENSE.txt". If the 
+file is not present, see http://www.gnu.org/licenses or write to the Free 
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-
+1301 USA.
+
+The interactive user interfaces in modified source and object code versions 
+of this program must display Appropriate Legal Notices, as required under 
+Section 5 of the GNU General Public License version 3.
+
+All the terms expressed above APPLY TO the following (with the exceptions 
+detailed at the point 1.1):
+
+1.0.1 All the files that are copied into the SUITECRM(TM) installation 
+directory ("SUITECRM DIRECTORY") or its sub-directories during the process 
+of installation ("INSTALLATION PROCESS") of the SOFTWARE.
+
+1.0.2 All the parts of code that are added to existing SUITECRM(TM) files 
+during the INSTALLATION PROCESS.
+
+1.0.3 All the files archived in the "SuitetoXero" zipped 
+package ("INSTALLATION PACKAGE").
+
+1.1 Exceptions. The terms expressed in the point 1.0 DO NOT APPLY TO
+the files and directories listed below. Hereby, the file/directory paths are
+to be intended as relative paths referred to the SUITECRM DIRECTORY path.
+
+1.1.1 XeroOAuth-PHP-master.
+
+Folder/Files:
+'custom/entrypoints/XeroOAuth-PHP-master/*.*'.
+
+Copyright (c) 2013 Xero Limited
+MIT License
+
+2.0 NO WARRANTY.
+
+THE SOFTWARE IS BEING DELIVERED TO YOU "AS IS" AND BF MAKES NO 
+WARRANTY AS TO ITS USE OR PERFORMANCE. BF DOES NOT AND CANNOT 
+WARRANT THE PERFORMANCE OR RESULTS YOU MAY OBTAIN BY USING THE 
+SOFTWARE. BF MAKES NO WARRANTIES, CONDITIONS, REPRESENTATIONS, OR 
+TERMS (EXPRESS OR IMPLIED WHETHER BY STATUTE, COMMON LAW, CUSTOM, 
+USAGE OR OTHERWISE) AS TO ANY MATTER INCLUDING WITHOUT LIMITATION NON-
+INFRINGEMENT OF THIRD PARTY RIGHTS, MERCHANTABILITY, INTEGRATION, 
+SATISFACTORY QUALITY, OR FITNESS FOR ANY PARTICULAR PURPOSE.
+
+3.0 LIMITATION OF LIABILITY
+
+3.1 FORCE MAJUERE. 
+
+NEITHER PARTY SHALL BE IN BREACH OF THIS AGREEMENT DUE TO FAILURE OF 
+PERFORMANCE THAT ARISES OUT OF CAUSES BEYOND ITS REASONABLE CONTROL.
+
+3.2 DISCLAIMER OF CONSEQUENTIAL DAMAGES. 
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL 
+BF BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL 
+OR EXEMPLARY DAMAGES ARISING OUT OF OR IN ANY WAY RELATING TO THIS 
+AGREEMENT OR THE USE OF OR INABILITY TO USE THE SOFTWARE OR 
+DOCUMENTATION INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF 
+GOODWILL, WORK STOPPAGE, LOST PROFITS, LOSS OF DATA, COMPUTER FAILURE 
+OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES EVEN IF ADVISED OF 
+THE POSSIBILITY THEREOF AND REGARDLESS OF THE LEGAL OR EQUITABLE 
+THEORY (CONTRACT, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE) UPON WHICH 
+THE CLAIM IS BASED.
