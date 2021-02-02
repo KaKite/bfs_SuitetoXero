@@ -88,7 +88,7 @@ if (isset($_REQUEST['wipe'])) {
 
 		// check for a related account
 		if ($invoiceobj->billing_account_id != '') {
-			$account_id = $invoiceobj->billing_account_id;;
+			$account_id = $invoiceobj->billing_account_id;
 			$accountobj = BeanFactory::getBean('Accounts', $account_id);
 			$xeroID = '';
 			$xeroID = $accountobj->xero_id_c;
