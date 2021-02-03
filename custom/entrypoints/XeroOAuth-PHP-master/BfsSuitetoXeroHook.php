@@ -1179,6 +1179,7 @@ class BfsSuitetoXeroHook
         // check products in Xero, if they don't exist, create them
         $response = $this->XeroOAuth->request('GET', $this->XeroOAuth->url('Items', 'core'), array('page' => 0, 'Where' => 'name="' . $productQuote['name'] . '" OR code="' . $prorow['part_number'] . '"'));
         $ItemCode = '';
+		$ExpCode = substr($ExpCode, -3);
         if ($this->XeroOAuth->response['code'] == 200) {
             $product = $this->XeroOAuth->parseResponse($this->XeroOAuth->response['response'], $this->XeroOAuth->response['format']);
             if (count($product->Items) > 0) {
