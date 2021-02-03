@@ -84,15 +84,8 @@ if (isset($_REQUEST['wipe'])) {
 		/* end of currency iso4217 code */
 
 		$Type = $invoiceobj->type_c;
-		if ($Type == '') {
-			$Type = 'ACCREC';
-		}
-		if ($Type == 'ACCREC') {
-			$ExpCode = '200';
-		} else {
-			$ExpCode = $invoiceobj->xero_expense_codes_c;
-			$Reference = $invoiceobj->name;
-		}
+		$ExpCode = substr($invoiceobj->xero_expense_codes_c, -3);
+		$Reference = $invoiceobj->name;
 		$Status = $invoiceobj->status;
 		$XeroAccepStatus = ['DRAFT', 'SUBMITTED', 'AUTHORISED'];
 		$Status = strtoupper($Status);

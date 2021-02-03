@@ -148,7 +148,7 @@ $viewdefs[$module_name] =
               'label' => 'LBL_CREATE_CONTACTS',
             ),
           ),
-          4 =>
+/*          4 =>
           array(
             0 =>
             array(
@@ -160,8 +160,8 @@ $viewdefs[$module_name] =
               'name' => 'delete_contacts',
               'label' => 'LBL_DELETE_CONTACTS',
             ),
-          ),
-          5 =>
+          ), */
+          4 =>
           array(
             0 =>
             array(
@@ -170,7 +170,7 @@ $viewdefs[$module_name] =
             ),
             1 => '',
           ),
-          6 =>
+          5 =>
           array(
             0 =>
             array(
@@ -179,7 +179,7 @@ $viewdefs[$module_name] =
             ),
             1 => '',
           ),
-          7 =>
+/*          7 =>
           array(
             0 =>
             array(
@@ -187,8 +187,8 @@ $viewdefs[$module_name] =
               'label' => 'LBL_DELETE_INVOICES',
             ),
             1 => '',
-          ),
+          ), */
         ),
       ),
     ),
-  );;
+  );

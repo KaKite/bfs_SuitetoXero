@@ -136,7 +136,8 @@ function is_cli()
 function writeLogger($log)
 {
     if (!class_exists('BfsSuiteToXeroLogger')) {
-        require_once './../BfsSuiteToXeroLogger.php';
+        //require_once './../BfsSuiteToXeroLogger.php';
+        require_once 'custom/entrypoints/XeroOAuth-PHP-master/BfsSuiteToXeroLogger.php';
         $myLogger = new BfsSuiteToXeroLogger();
     }
     if (isset($myLogger)) {

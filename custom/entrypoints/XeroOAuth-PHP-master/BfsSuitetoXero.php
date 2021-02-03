@@ -595,7 +595,7 @@ class BfsSuitetoXero
         $sea->save($accountobj->id, "Accounts");
 
         $this->writeLogger(' AccountSaved successfully after save line 586');
-        
+
         require_once 'custom/entrypoints/XeroOAuth-PHP-master/LinkedContact.php';
         $LinkedContact = new LinkedContact();
 
@@ -746,7 +746,7 @@ class BfsSuitetoXero
         }
         $this->writeLogger('Created invoices below:');
         $this->writeLogger($createdInvoice);
-        $this->alertMsg[] = count($createdInvoice) . ' Invoice has been created.';
+        $this->alertMsg[] = count($createdInvoice) . ' Invoice/s have been created.';
     }
 
     public function createInvoiceRecord($Invoice)
@@ -918,6 +918,9 @@ class BfsSuitetoXero
         if ($this->XeroOAuth->response['code'] == 200) {
             $FetchedContact = $this->XeroOAuth->parseResponse($this->XeroOAuth->response['response'], $this->XeroOAuth->response['format']);
 
+            if (empty($FetchedContact->Contacts))
+                return null;
+
             // calling function it will create reords
             $createRecord = $this->xeroContactCheckCreate($FetchedContact->Contacts->Contact, false);
             $bean = BeanFactory::getBean($createRecord['module'], $createRecord['id']);
@@ -938,7 +941,7 @@ class BfsSuitetoXero
         global $db;
         // check Existing record;
         $checkAccountQuery = "SELECT id_c from $table where xero_id_c='$XeroID'";
-        $checkAccountResult = $db->query($checkAccountQuery);;
+        $checkAccountResult = $db->query($checkAccountQuery);
         if ($accountRow = $db->fetchByAssoc($checkAccountResult)) {
             return $accountRow['id_c'];
         }

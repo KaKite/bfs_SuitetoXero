@@ -314,28 +314,33 @@ if (isset($_REQUEST['wipe'])) {
 			}
 			$account_phone = $accountobj->phone_office;
 			$phone_fax = $accountobj->phone_fax;
-			$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'last_name ASC,first_name ASC');
-			$i = 1;
-			$xmlchild = '';
-			$xmlchild .= "<ContactPersons>";
-			foreach ($contacts as $contact) {
-				if ($contact->id != $contactobj->id) {
+			$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'xero_primary_contact_c DESC, last_name ASC,first_name ASC');
+
+			// xmlchild var only have child contacts not primary contact, for primary contact var xmlPrimaryContact will have value
+			$xmlchild = '<ContactPersons>';
+			foreach ($contacts as $key => $contact) {
+				if ($key == 0 && $contact->xero_primary_contact_c == 1) {
+					$primaryContact = $contacts[0];
+					$xmlPrimaryContact = " <FirstName>" . $primaryContact->first_name . "</FirstName>
+						<LastName>" . $primaryContact->last_name . "</LastName>
+						<EmailAddress>" . $primaryContact->email1 . "</EmailAddress>";
+				} else {
 					$xmlchild .= "<ContactPerson>
-											 <FirstName>" . $contact->first_name . "</FirstName>
-											<LastName>" . $contact->last_name . "</LastName>
-											<EmailAddress>" . $contact->email1 . "</EmailAddress>
-										</ContactPerson>
-												";
-					$i++;
-					if ($i >= 6)
+						<FirstName>" . $contact->first_name . "</FirstName>
+						<LastName>" . $contact->last_name . "</LastName>
+						<EmailAddress>" . $contact->email1 . "</EmailAddress>
+					</ContactPerson>";
+					if ($key == 5)
 						break;
 				}
 			}
 			$xmlchild .= "</ContactPersons>";
+
 			$str = htmlentities($account_name, ENT_QUOTES, 'UTF-8');
 			$xml1 = "<Contacts>
 							 <Contact>
 							   <Name>" . $str . "</Name>
+							   " . (isset($xmlPrimaryContact) ? $xmlPrimaryContact : '') . "
 							   <AccountNumber>" . $accountobj->id . "</AccountNumber>
 								 <Addresses>
 								   <Address>
@@ -360,7 +365,7 @@ if (isset($_REQUEST['wipe'])) {
 								  <FirstName>" . $contactobj->first_name . "</FirstName>
 								 <LastName>" . $contactobj->last_name . "</LastName>
 								 <EmailAddress>" . $contact_email . "</EmailAddress>";
-			//$xml1 .= $xmlchild;
+			$xml1 .= $xmlchild;
 			$xml1 .= "<Phones>
 								<Phone>
 									<PhoneType>DEFAULT</PhoneType>

@@ -81,6 +81,7 @@ $mod_strings = array (
   'LBL_REFRESH_TOKEN' => 'Refresh Token',
   'LBL_TENANT_ID' => 'Tenant ID',
   'LBL_SYNCH_WITH_XERO' => 'Synch with Xero',
+  'LBL_DELETED_SYNCHED_C' => 'Synch Deleted',								 
   'LBL_WHICH_RECORDS' => 'Which Records?',
   'LBL_UPDATE_RECORDS_FROM' => 'Update Records From',
   'LBL_SYNCH_CONTACTS' => 'Update Contacts',

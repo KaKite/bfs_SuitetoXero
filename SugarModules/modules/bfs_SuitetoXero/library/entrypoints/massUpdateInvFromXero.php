@@ -140,13 +140,13 @@ if (isset($_REQUEST['wipe'])) {
 					$Invoicebean->status			=    		$Status;
 					if ($Type == 'ACCREC') {
 						$Invoicebean->type_c		=    		'ACCREC';
-						$Invoicebean->xero_expense_codes_c =	'';
+						$Invoicebean->xero_expense_codes_c =    'ACCREC_'.$ExpCode;
 						$Invoicebean->name			=    		$InvoiceNumber;
 						$stat						=			'AccountsReceivable';
 					}
 					if ($Type == 'ACCPAY') {
 						$Invoicebean->type_c		=    		'ACCPAY';
-						$Invoicebean->xero_expense_codes_c =	$ExpCode;
+						$Invoicebean->xero_expense_codes_c =    'ACCPAY_'.$ExpCode;
 						$stat						=			'AccountsPayable';
 					}
 					$Invoicebean->total_amt			=			$SubTotal;
@@ -243,10 +243,6 @@ if (isset($_REQUEST['wipe'])) {
 						$GLOBALS['db']->query($GRSQL);
 						$groupID = $oid;
 					}
-					//Empty Line Items
-					// $DelLineItem = "update aos_products_quotes set deleted=1 where parent_id='" . $Invoicebean->id . "' and parent_type='AOS_Invoices' and group_id='" . $groupID . "'";
-					// $GLOBALS['db']->query($DelLineItem);
-
 					//Initialise variables
 					$i = 1;
 					$totalPrice		=	0.00;

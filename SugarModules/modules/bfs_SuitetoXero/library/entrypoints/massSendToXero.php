@@ -80,38 +80,36 @@ if (isset($_REQUEST['wipe'])) {
 
 		$account_phone = $accountobj->phone_office;
 		$phone_fax = $accountobj->phone_fax;
-		$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'last_name ASC,first_name ASC');
+		$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'xero_primary_contact_c DESC, last_name ASC,first_name ASC');
 
-		$i = 1;
+		// xmlchild var only have child contacts not primary contact, for primary contact var xmlPrimaryContact will have value
 		$xmlchild = '';
-		foreach ($contacts as $contact) {
-			if ($i == 1) {
-				$xmlchild .= " <FirstName>" . $contact->first_name . "</FirstName>
-				<LastName>" . $contact->last_name . "</LastName>
-				<EmailAddress>" . $contact->email1 . "</EmailAddress>";
-			} else {
-				if ($i == 2) {
-					$xmlchild .= "<ContactPersons>";
-				}
+		if (count($contacts) > 0) {
+			$primaryContact = $contacts[0];
+			unset($contacts[0]);
+			$xmlchild .= " <FirstName>" . $primaryContact->first_name . "</FirstName>
+				<LastName>" . $primaryContact->last_name . "</LastName>
+				<EmailAddress>" . $primaryContact->email1 . "</EmailAddress>";
+
+			$xmlchild .= "<ContactPersons>";
+			foreach ($contacts as $key => $contact) {
 				$xmlchild .= "<ContactPerson>
-								<FirstName>" . $contact->first_name . "</FirstName>
-								<LastName>" . $contact->last_name . "</LastName>
-								<EmailAddress>" . $contact->email1 . "</EmailAddress>
-							</ContactPerson>
-									";
+						<FirstName>" . $contact->first_name . "</FirstName>
+						<LastName>" . $contact->last_name . "</LastName>
+						<EmailAddress>" . $contact->email1 . "</EmailAddress>
+					</ContactPerson>";
+				if ($key == 5)
+					break;
 			}
-			$i++;
-			if ($i >= 6)
-				break;
-		}
-		if ($i > 2) {
 			$xmlchild .= "</ContactPersons>";
 		}
+
 		//echo print_r($xmlchild);exit;
 		$xml = "<Contacts>
 				<Contact>
 				<ContactID>" . $account_id . "</ContactID>
 				<Name>" . $account_name . "</Name>
+				" . (isset($xmlPrimaryContact) ? $xmlPrimaryContact : '') . "
 				<AccountNumber>" . $account_id . "</AccountNumber>
 				<Website>" . $accountobj->website . "</Website>
 				<Addresses>
@@ -158,7 +156,7 @@ if (isset($_REQUEST['wipe'])) {
 		// echo "<pre>"; print_r($XeroOAuth->parseResponse($XeroOAuth->response['response'], $XeroOAuth->response['format'])); die;
 		if ($XeroOAuth->response['code'] == 200) {
 			$duplicatecontact = $XeroOAuth->parseResponse($XeroOAuth->response['response'], $XeroOAuth->response['format']);
-			
+
 			// echo"<pre>";print_r( $XeroContactobj);echo count($duplicatecontact->Contacts[0]);
 			if (isset($duplicatecontact->Contacts) && count($duplicatecontact->Contacts) > 0 && ($duplicatecontact->Contacts[0]->Contact->ContactID != '')) {
 				$XeroContactobj = $duplicatecontact->Contacts[0]->Contact;
@@ -166,11 +164,16 @@ if (isset($_REQUEST['wipe'])) {
 				$accountobj->dtime_synched_c = $CurrenrDateTime;
 				$accountobj->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactobj->ContactID;
 				$accountobj->save();
-				foreach ($contacts as $contact) {
-					$contact->xero_id_c = $XeroContactobj->ContactID;
-					$contact->dtime_synched_c = $CurrenrDateTime;
-					$contact->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactobj->ContactID;
-					$contact->save();
+
+				// updating all related contacts
+				foreach ($contacts as $relatedContact) {
+					if ($relatedContact->id == $primaryContact->id) { // if primary contact
+						$relatedContact->xero_primary_contact_c = 1;
+					}
+					$relatedContact->xero_id_c = $XeroContactobj->ContactID;
+					$relatedContact->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactobj->ContactID;
+					$relatedContact->dtime_synched_c = $CurrenrDateTime;
+					$relatedContact->save();
 				}
 				if ($ContactUpdated != '')
 					$ContactUpdated = $ContactUpdated . '\\n' . $accountobj->name;

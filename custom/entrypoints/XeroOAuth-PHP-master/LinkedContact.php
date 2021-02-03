@@ -61,13 +61,12 @@ class LinkedContact
             $sea = new SugarEmailAddress;
             $sea->addAddress($Contact->EmailAddress, true);
             $sea->save($contactobj->id, "Contacts");
-        }
 
-        $newID = create_guid();
-        if (!$this->relationshipExist($contactobj->id, $account_id)) {
-            $LinkedValues[] = "('$newID', '" . $contactobj->id . "', '$account_id', '" . $this->nowDb() . "')";
+            $newID = create_guid();
+            if (!$this->relationshipExist($contactobj->id, $account_id)) {
+                $LinkedValues[] = "('$newID', '" . $contactobj->id . "', '$account_id', '" . $this->nowDb() . "')";
+            }
         }
-
 
         foreach ($Contact->ContactPersons->ContactPerson as $ContactPerson) {
             if (!empty(trim($Contact->FirstName)) ||  !empty(trim($Contact->LastName))) {

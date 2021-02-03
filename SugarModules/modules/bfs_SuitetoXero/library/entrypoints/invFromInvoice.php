@@ -101,15 +101,8 @@ if (isset($_REQUEST['wipe'])) {
 				$currency_name 				= 			$Currency->iso4217;
 			}
 			/* end of currency iso4217 code */
-			if ($Type == '') {
-				$Type = 'ACCREC';
-			}
-			if ($Type == 'ACCREC') {
-				$ExpCode = '200';
-			} else {
-				$ExpCode = $invoiceobj->xero_expense_codes_c;
-				$Reference = $invoiceobj->name;
-			}
+			$ExpCode = substr($invoiceobj->xero_expense_codes_c, -3);
+			$Reference = $invoiceobj->name;
 			$Status = $invoiceobj->status;
 			$Status = strtoupper($Status);
 			if ($Status == '') {
@@ -288,38 +281,34 @@ if (isset($_REQUEST['wipe'])) {
 
 				$account_phone = $accountobj->phone_office;
 				$phone_fax = $accountobj->phone_fax;
-				$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'last_name ASC,first_name ASC');
+				$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'xero_primary_contact_c DESC, last_name ASC,first_name ASC');
 
-				$i = 1;
-				$xmlchild = '';
-				foreach ($contacts as $contact) {
-					if ($i == 1) {
-						$xmlchild .= " <FirstName>" . $contact->first_name . "</FirstName>
-							<LastName>" . $contact->last_name . "</LastName>
-							<EmailAddress>" . $contact->email1 . "</EmailAddress>";
+				// xmlchild var only have child contacts not primary contact, for primary contact var xmlPrimaryContact will have value
+				$xmlchild = '<ContactPersons>';
+				foreach ($contacts as $key => $contact) {
+					if ($key == 0 && $contact->xero_primary_contact_c == 1) {
+						$primaryContact = $contacts[0];
+						$xmlPrimaryContact = " <FirstName>" . $primaryContact->first_name . "</FirstName>
+							<LastName>" . $primaryContact->last_name . "</LastName>
+							<EmailAddress>" . $primaryContact->email1 . "</EmailAddress>";
 					} else {
-						if ($i == 2) {
-							$xmlchild .= "<ContactPersons>";
-						}
 						$xmlchild .= "<ContactPerson>
-										 <FirstName>" . $contact->first_name . "</FirstName>
-										<LastName>" . $contact->last_name . "</LastName>
-										<EmailAddress>" . $contact->email1 . "</EmailAddress>
-									</ContactPerson>
-											";
+								<FirstName>" . $contact->first_name . "</FirstName>
+								<LastName>" . $contact->last_name . "</LastName>
+								<EmailAddress>" . $contact->email1 . "</EmailAddress>
+							</ContactPerson>";
+						if ($key == 5)
+							break;
 					}
-					$i++;
-					if ($i >= 6)
-						break;
 				}
-				if ($i > 2) {
-					$xmlchild .= "</ContactPersons>";
-				}
+				$xmlchild .= "</ContactPersons>";
+
 				//echo print_r($xmlchild);exit;
 				$xml = "<Contacts>
 				 <Contact>
 					<ContactID>" . $account_id . "</ContactID>
 				   <Name>" . $account_name . "</Name>
+				   " . (isset($xmlPrimaryContact) ? $xmlPrimaryContact : '') . "
 				   <AccountNumber>" . $account_id . "</AccountNumber>
 				   <Website>" . $accountobj->website . "</Website>
 					 <Addresses>
@@ -368,10 +357,16 @@ if (isset($_REQUEST['wipe'])) {
 						$accountobj->xero_id_c = $XeroContactID;
 						$accountobj->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
 						$accountobj->save();
-						foreach ($contacts as $contact) {
-							$contact->xero_id_c = $XeroContactID;
-							$contact->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
-							$contact->save();
+
+						// updating all related contacts
+						foreach ($contacts as $relatedContact) {
+							if ($relatedContact->id == $primaryContact->id) { // if primary contact
+								$relatedContact->xero_primary_contact_c = 1;
+							}
+							$relatedContact->xero_id_c = $XeroContactID;
+							$relatedContact->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
+							$relatedContact->dtime_synched_c = $CurrenrDateTime;
+							$relatedContact->save();
 						}
 					}
 					$xeroID = $XeroContactID;
@@ -625,15 +620,8 @@ if (isset($_REQUEST['wipe'])) {
 		$invoiceID = $_REQUEST['invID'];
 		$invoiceobj = BeanFactory::getBean('AOS_Invoices', $invoiceID);
 		$Type = $invoiceobj->type_c;
-		if ($Type == '') {
-			$Type = 'ACCREC';
-		}
-		if ($Type == 'ACCREC') {
-			$ExpCode = '200';
-		} else {
-			$ExpCode = $invoiceobj->xero_expense_codes_c;
-			$Reference = $invoiceobj->name;
-		}
+		$ExpCode = substr($invoiceobj->xero_expense_codes_c, -3);
+		$Reference = $invoiceobj->name;
 		$Status = $invoiceobj->status;
 		$Status = strtoupper($Status);
 		if ($Status == '') {

@@ -605,7 +605,7 @@ class XeroOAuth
 				$cert_content = file_get_contents($this->config['rsa_public_key']);
 				$priv_key_content = file_get_contents($this->config['rsa_private_key']);
 				if (!openssl_x509_check_private_key($cert_content, $priv_key_content))
-					$testOutput['rsa_cert_error'] = "Application certificate and key do not match \n";;
+					$testOutput['rsa_cert_error'] = "Application certificate and key do not match \n";
 			}
 		}
 

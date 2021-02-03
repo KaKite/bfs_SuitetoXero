@@ -296,4 +296,4 @@ $viewdefs[$module_name] =
         ),
       ),
     ),
-  );;
+  );

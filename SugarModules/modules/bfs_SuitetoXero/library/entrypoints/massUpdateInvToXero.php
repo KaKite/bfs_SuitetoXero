@@ -84,7 +84,6 @@ if (isset($_REQUEST['wipe'])) {
 		if ($XeroOAuth->response['code'] == 200) {
 			$InvoicesInvoice = $XeroOAuth->parseResponse($XeroOAuth->response['response'], $XeroOAuth->response['format']);
 			$Invoice = $InvoicesInvoice->Invoices->Invoice;
-
 			// update the invoice in Xero
 			$currencyID = $invoiceobj->currency_id;
 			if ($currencyID == '') {
@@ -97,16 +96,8 @@ if (isset($_REQUEST['wipe'])) {
 				$currency_name 				= 			$Currency->iso4217;
 			}
 			/* end of currency iso4217 code */
-			$Type = $invoiceobj->type_c;
-			if ($Type == '') {
-				$Type = 'ACCREC';
-			}
-			if ($Type == 'ACCREC') {
-				$ExpCode = '200';
-			} else {
-				$ExpCode = $invoiceobj->xero_expense_codes_c;
-				$Reference = $invoiceobj->name;
-			}
+			$ExpCode = substr($invoiceobj->xero_expense_codes_c, -3);
+			$Reference = $invoiceobj->name;
 			$Status = $invoiceobj->status;
 			if ($Status == '') {
 				$Status = 'DRAFT';
@@ -254,13 +245,10 @@ if (isset($_REQUEST['wipe'])) {
 			} else {
 				$validationError = $XeroOAuth->parseResponse($XeroOAuth->response['response'], $XeroOAuth->response['format']);
 				$response = $XeroOAuth->response;
-				//echo"<pre>";print_r($response);die;
-				//$xero_error = $validationError->Elements->DataContractBase->ValidationErrors->ValidationError->Message;
 				$problems++;
 			} // end of for each
 		} else { // validation error from line
-			$problems++;
-			//$xero_error = $validationError->Elements->DataContractBase->ValidationErrors->ValidationError->Message;					
+			$problems++;								
 		}
 	}
 

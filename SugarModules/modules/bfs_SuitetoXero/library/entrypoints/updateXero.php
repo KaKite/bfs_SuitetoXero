@@ -88,52 +88,47 @@ if (isset($_REQUEST['wipe'])) {
 				$syncFailur[] = $account_name;
 			} else {
 				echo ("<SCRIPT LANGUAGE='JavaScript'>
-						window.alert('Some Error has been occured. Please try again.');
+						window.alert('An Error has occured. Please try again.');
 						window.location.href='index.php?module=Contacts&action=DetailView&record=" . $accountobj->id . "';
 						</SCRIPT>");
 			}
 		}
 
-		$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'last_name ASC,first_name ASC');
-		$i = 1;
-		$xmlchild = '';
-		if (count($contacts) == 1) {
-			$contact = $contacts[0];
+		$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'xero_primary_contact_c DESC, last_name ASC,first_name ASC');
 
-			if ((string) $fetchedContacts->Contacts->Contact->FirstName == '' && (string) $fetchedContacts->Contacts->Contact->LastName == '' && !empty($contact->email1)) {
-				$xmlchild .= " <FirstName>" . $contact->first_name . "</FirstName>
-					<LastName>" . $contact->last_name . "</LastName>
-					<EmailAddress>" . $contact->email1 . "</EmailAddress>";
-			}
-		} else if (count($contacts) > 1) {
-			foreach ($contacts as $contact) {
-				if ($i == 1 && (string) $fetchedContacts->Contacts->Contact->FirstName == '' && (string) $fetchedContacts->Contacts->Contact->LastName == '' && !empty($contact->email1)) {
-					$xmlchild .= " <FirstName>" . $contact->first_name . "</FirstName>
+		// xmlchild var only have child contacts not primary contact, for primary contact var xmlPrimaryContact will have value
+		$xmlchild = '<ContactPersons>';
+		foreach ($contacts as $key => $contact) {
+			if ($key == 0 && $contact->xero_primary_contact_c == 1) {
+				$primaryContact = $contacts[0];
+				$xmlPrimaryContact = " <FirstName>" . $primaryContact->first_name . "</FirstName>
+						<LastName>" . $primaryContact->last_name . "</LastName>
+						<EmailAddress>" . $primaryContact->email1 . "</EmailAddress>";
+			} else if (
+				$key == 0 && (string) $fetchedContacts->Contacts->Contact->FirstName == '' &&
+				(string) $fetchedContacts->Contacts->Contact->LastName == '' && !empty($contact->email1)
+			) {
+				$primaryContact = $contacts[0];
+				$xmlPrimaryContact = " <FirstName>" . $primaryContact->first_name . "</FirstName>
+					<LastName>" . $primaryContact->last_name . "</LastName>
+					<EmailAddress>" . $primaryContact->email1 . "</EmailAddress>";
+			} else {
+				$xmlchild .= "<ContactPerson>
+						<FirstName>" . $contact->first_name . "</FirstName>
 						<LastName>" . $contact->last_name . "</LastName>
-						<EmailAddress>" . $contact->email1 . "</EmailAddress>";
-				} else {
-					if ($i == 2) {
-						$xmlchild .= "<ContactPersons>";
-					}
-					$xmlchild .= "<ContactPerson>
-									 <FirstName>" . $contact->first_name . "</FirstName>
-									<LastName>" . $contact->last_name . "</LastName>
-									<EmailAddress>" . $contact->email1 . "</EmailAddress>
-								</ContactPerson>
-										";
-				}
-				$i++;
-				if ($i >= 6)
+						<EmailAddress>" . $contact->email1 . "</EmailAddress>
+					</ContactPerson>";
+				if ($key == 5)
 					break;
 			}
-			if ($i > 2) {
-				$xmlchild .= "</ContactPersons>";
-			}
 		}
+		$xmlchild .= "</ContactPersons>";
+
 		$xml = "<Contacts>
 			 <Contact>
 				<ContactID>" . $xeroID . "</ContactID>
 			   <Name>" . $account_name . "</Name>
+			   " . (isset($xmlPrimaryContact) ? $xmlPrimaryContact : '') . "
 			   <AccountNumber>" . $accountobj->id . "</AccountNumber>
 			   <Website>" . $website . "</Website>
 				 <Addresses>
@@ -191,16 +186,18 @@ if (isset($_REQUEST['wipe'])) {
 				$accountobj->xero_id_c = $XeroContactID;
 				$accountobj->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
 				$accountobj->dtime_synched_c = $CurrenrDateTime;
-				$GLOBALS['log']->debug('hook_called' . $_REQUEST['hook_called']);
 				$accountobj->save();
 
-				// commented by Rupendra ass don't found $contacts var 
-				// foreach ($contacts as $contact) {
-				// 	$contact->xero_id_c = $XeroContactID;
-				// 	$contact->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
-				// 	$contact->dtime_synched_c = $CurrenrDateTime;
-				// 	$contact->save();
-				// }
+				// updating all related contacts
+				foreach ($contacts as $relatedContact) {
+					if ($relatedContact->id == $primaryContact->id) { // if primary contact
+						$relatedContact->xero_primary_contact_c = 1;
+					}
+					$relatedContact->xero_id_c = $XeroContactID;
+					$relatedContact->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
+					$relatedContact->dtime_synched_c = $CurrenrDateTime;
+					$relatedContact->save();
+				}
 
 				$queryParams = array(
 					'module' => 'Accounts',

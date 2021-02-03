@@ -41,9 +41,9 @@ if (isset($_REQUEST['wipe'])) {
 	$invcnt = 0;
 	$xeroidcnt = 0;
 	$problemscnt = 0;
-	$noLinkedContact = 0; // variable added by Rupendra for count invoice that have no linked Account/Contact
-	$invcreated = 0; // variable added by Rupendra for count created invoices
-	$invProblemNumber = ''; // variable added by Rupendra for showing msg about which invoices facing problem
+	$noLinkedContact = 0;
+	$invcreated = 0;
+	$invProblemNumber = '';
 	$itemCodeMismatch = [];
 
 	// load the invoice records
@@ -63,8 +63,6 @@ if (isset($_REQUEST['wipe'])) {
 			$xeroidcnt++;
 			continue;
 		}
-
-		// added code by rupendra 
 		// get the associated account and/or contact ids for the invoice update process
 		$account_id = '';
 		$account_id = $invoiceobj->billing_account_id;
@@ -126,38 +124,34 @@ if (isset($_REQUEST['wipe'])) {
 
 				$account_phone = $accountobj->phone_office;
 				$phone_fax = $accountobj->phone_fax;
-				$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'last_name ASC,first_name ASC');
+				$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'xero_primary_contact_c DESC, last_name ASC,first_name ASC');
 
-				$i = 1;
-				$xmlchild = '';
-				foreach ($contacts as $contact) {
-					if ($i == 1) {
-						$xmlchild .= " <FirstName>" . $contact->first_name . "</FirstName>
-							<LastName>" . $contact->last_name . "</LastName>
-							<EmailAddress>" . $contact->email1 . "</EmailAddress>";
+				// xmlchild var only have child contacts not primary contact, for primary contact var xmlPrimaryContact will have value
+				$xmlchild = '<ContactPersons>';
+				foreach ($contacts as $key => $contact) {
+					if ($key == 0 && $contact->xero_primary_contact_c == 1) {
+						$primaryContact = $contacts[0];
+						$xmlPrimaryContact = " <FirstName>" . $primaryContact->first_name . "</FirstName>
+						<LastName>" . $primaryContact->last_name . "</LastName>
+						<EmailAddress>" . $primaryContact->email1 . "</EmailAddress>";
 					} else {
-						if ($i == 2) {
-							$xmlchild .= "<ContactPersons>";
-						}
 						$xmlchild .= "<ContactPerson>
-										 <FirstName>" . $contact->first_name . "</FirstName>
-										<LastName>" . $contact->last_name . "</LastName>
-										<EmailAddress>" . $contact->email1 . "</EmailAddress>
-									</ContactPerson>
-											";
+						<FirstName>" . $contact->first_name . "</FirstName>
+						<LastName>" . $contact->last_name . "</LastName>
+						<EmailAddress>" . $contact->email1 . "</EmailAddress>
+					</ContactPerson>";
+						if ($key == 5)
+							break;
 					}
-					$i++;
-					if ($i >= 6)
-						break;
 				}
-				if ($i > 2) {
-					$xmlchild .= "</ContactPersons>";
-				}
+				$xmlchild .= "</ContactPersons>";
+
 				//echo print_r($xmlchild);exit;
 				$xml = "<Contacts>
 				 <Contact>
 					<ContactID>" . $account_id . "</ContactID>
 				   <Name>" . $account_name . "</Name>
+				   " . (isset($xmlPrimaryContact) ? $xmlPrimaryContact : '') . "
 				   <AccountNumber>" . $account_id . "</AccountNumber>
 				   <Website>" . $accountobj->website . "</Website>
 					 <Addresses>
@@ -197,7 +191,6 @@ if (isset($_REQUEST['wipe'])) {
 			   </Contacts>
 			   ";
 				$response = $XeroOAuth->request('PUT', $XeroOAuth->url('Contacts', 'core'), array(), $xml);
-				//echo $XeroOAuth->response['code'];
 				if ($XeroOAuth->response['code'] == 200) {
 					$contact = $XeroOAuth->parseResponse($XeroOAuth->response['response'], $XeroOAuth->response['format']);
 					if (count($contact->Contacts[0]) > 0) {
@@ -206,10 +199,16 @@ if (isset($_REQUEST['wipe'])) {
 						$accountobj->xero_id_c = $XeroContactID;
 						$accountobj->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
 						$accountobj->save();
-						foreach ($contacts as $contact) {
-							$contact->xero_id_c = $XeroContactID;
-							$contact->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
-							$contact->save();
+
+						// updating all related contacts
+						foreach ($contacts as $relatedContact) {
+							if ($relatedContact->id == $primaryContact->id) { // if primary contact
+								$relatedContact->xero_primary_contact_c = 1;
+							}
+							$relatedContact->xero_id_c = $XeroContactID;
+							$relatedContact->xero_link_c = "https://go.xero.com/Contacts/View/" . $XeroContactID;
+							$relatedContact->dtime_synched_c = $CurrenrDateTime;
+							$relatedContact->save();
 						}
 					}
 					$xeroID = $XeroContactID;
@@ -220,7 +219,6 @@ if (isset($_REQUEST['wipe'])) {
 				    alert('There was a problem in Xero with creating the Contact record\\n\\nXERO ERROR RETURNED:\\n$xero_error');
 					window.location.href='index.php?module=AOS_Invoices&action=DetailView&record=" . $invoiceobj->id . "';
 				</SCRIPT>");
-					//echo"<pre>";print_r($validationError);die;
 				}
 			}
 		} else if ($invoiceobj->billing_contact_id != '') {
@@ -338,7 +336,6 @@ if (isset($_REQUEST['wipe'])) {
 			   </Contacts>
 			   ";
 					$response = $XeroOAuth->request('PUT', $XeroOAuth->url('Contacts', 'core'), array(), $xml);
-					//echo $XeroOAuth->response['code'];
 					if ($XeroOAuth->response['code'] == 200) {
 						$contact = $XeroOAuth->parseResponse($XeroOAuth->response['response'], $XeroOAuth->response['format']);
 						if (count($contact->Contacts[0]) > 0) {
@@ -463,15 +460,8 @@ if (isset($_REQUEST['wipe'])) {
 		$invoiceID = $invoiceID;
 		$invoiceobj = BeanFactory::getBean('AOS_Invoices', $invoiceID);
 		$Type = $invoiceobj->type_c;
-		if ($Type == '') {
-			$Type = 'ACCREC';
-		}
-		if ($Type == 'ACCREC') {
-			$ExpCode = '200';
-		} else {
-			$ExpCode = $invoiceobj->xero_expense_codes_c;
-			$Reference = $invoiceobj->name;
-		}
+		$ExpCode = substr($invoiceobj->xero_expense_codes_c, -3);
+		$Reference = $invoiceobj->name;
 		$Status = $invoiceobj->status;
 		$XeroAccepStatus = ['DRAFT', 'SUBMITTED', 'AUTHORISED'];
 		$Status = strtoupper($Status);
@@ -624,37 +614,17 @@ if (isset($_REQUEST['wipe'])) {
 			$invcreated++;
 		} else {
 			$validationError = $XeroOAuth->parseResponse($XeroOAuth->response['response'], $XeroOAuth->response['format']);
-			//print_r($validationError);
 			$problemscnt++;
-			$invProblemNumber .= "\\n\\n$validationError";
+			$invProblemNumber .= "\\n\\n($validationError->Message)";
 			if (isset($validationError->Message)) {
 				$xero_error = $validationError->Message;
 			} else {
 				$xero_error = $validationError->Elements->DataContractBase->ValidationErrors->ValidationError->Message;
 			}
-
-			// echo ("<SCRIPT LANGUAGE='JavaScript'> // it should not be redirect back on error added code by Rupendra
-			// 	    alert('There was a problem in Xero with creating this invoice\\n\\nXERO ERROR RETURNED:\\n$xero_error');
-			// 		window.location.href='index.php?module=AOS_Invoices&action=index';
-			// 	</SCRIPT>");
 		}
 	} // end of for each loop
+	// show all count data
 
-	// Commneted by rupendra for showing all count data
-	// 	if ($xeroidcnt > 0) {
-	// 		$invcreated = $invcnt - $xeroidcnt;
-	// 		echo ("<SCRIPT LANGUAGE='JavaScript'>
-	//   alert('Of the $invcnt Invoices selected, $xeroidcnt already existed in Xero\\n\\n$invcreated Invoices were created, $xeroidcnt were skipped');
-	// 			window.location.href='index.php?module=AOS_Invoices&action=index';
-	// 	</SCRIPT>");
-	// 	} else {
-	// 		echo ("<SCRIPT LANGUAGE='JavaScript'>
-	//   alert('$invcnt Invoices were successfully created in Xero');
-	// 			window.location.href='index.php?module=AOS_Invoices&action=index';
-	// 	</SCRIPT>");
-	// 	}
-
-	// Added by Rupendra for showing all count data
 	$alertMsg = "Of the $invcnt Invoices selected.";
 	if ($xeroidcnt > 0) {
 		$alertMsg .= "\\n\\n$xeroidcnt already existed in Xero.";
@@ -665,7 +635,7 @@ if (isset($_REQUEST['wipe'])) {
 	$alertMsg .= "\\n\\n$invcreated Invoices were created.";
 
 	if (($xeroidcnt + $noLinkedContact) > 0) {
-		$alertMsg .= "\\n\\n" . ($xeroidcnt + $noLinkedContact) . " were skipped.";;
+		$alertMsg .= "\\n\\n" . ($xeroidcnt + $noLinkedContact) . " were skipped.";
 	}
 
 	if ($invProblemNumber != '') {
@@ -680,6 +650,7 @@ if (isset($_REQUEST['wipe'])) {
 			writeLogger($itemCodeMismatch);
 		}
 	}
+
 	if (isset($_REQUEST['CRON']) && $_REQUEST['CRON']) {
 		$alertMsg = explode("\\n\\n", $alertMsg);
 		$this->writeLogger("Mass Invoices To Xero ==>>" . implode("\n", $alertMsg));

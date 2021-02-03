@@ -160,11 +160,7 @@ if (isset($_REQUEST['wipe'])) {
 							$contactobj->save();
 						}
 						$count++;
-					} else {
-						//echo outputError($XeroOAuth);
-						/*echo ("<SCRIPT LANGUAGE='JavaScript'>
-									window.alert('A contact with this name ALREADY exists in Xero. Duplicate names are NOT allowed.\\nThe Xero ID and Xero Link in the contact record have been updated')								window.location.href='index.php?module=Contacts&action=DetailView&record=".$contactobj->id."';
-									</SCRIPT>");*/
+					} else {						
 						continue;
 					}
 				}

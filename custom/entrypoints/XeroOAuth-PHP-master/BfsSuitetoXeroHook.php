@@ -262,7 +262,7 @@ class BfsSuitetoXeroHook
     public function xeroContactCheckCreate($contact)
     {
         if ($contact->Name == ($contact->FirstName . ' ' . $contact->LastName)) {
-            return $this->synchContactFromXero('CREATE', $contact);;
+            return $this->synchContactFromXero('CREATE', $contact);
         } else {
             return $this->synchAccountFromXero('CREATE', $contact);
         }
@@ -683,7 +683,7 @@ class BfsSuitetoXeroHook
         global $db;
         // check Existing record;
         $checkAccountQuery = "SELECT id_c from $table where xero_id_c='$XeroID'";
-        $checkAccountResult = $db->query($checkAccountQuery);;
+        $checkAccountResult = $db->query($checkAccountQuery);
         if ($accountRow = $db->fetchByAssoc($checkAccountResult)) {
             return $accountRow['id_c'];
         }

@@ -138,13 +138,13 @@ if (isset($_REQUEST['wipe'])) {
 					$Invoicebean->status			=    		$Status;
 					if ($Type == 'ACCREC') {
 						$Invoicebean->type_c		=    		'ACCREC';
-						$Invoicebean->xero_expense_codes_c		=   '';
+						$Invoicebean->xero_expense_codes_c =    'ACCREC_'.$ExpCode;
 						$Invoicebean->name			=    		$InvoiceNumber;
 						$stat						=			'AccountsReceivable';
 					}
 					if ($Type == 'ACCPAY') {
 						$Invoicebean->type_c		=    		'ACCPAY';
-						$Invoicebean->xero_expense_codes_c		=   $ExpCode;
+						$Invoicebean->xero_expense_codes_c =    'ACCPAY_'.$ExpCode;
 						$stat						=			'AccountsPayable';
 					}
 					/* Get the currency ID from the currencies table CurrencyCode = ISO4217 in currencies*/

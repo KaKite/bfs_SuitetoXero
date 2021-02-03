@@ -73,60 +73,29 @@ if (isset($_REQUEST['wipe'])) {
 
 	$account_phone = $accountobj->phone_office;
 	$phone_fax = $accountobj->phone_fax;
-	$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'last_name ASC,first_name ASC');
+	$contacts = $accountobj->get_linked_beans('contacts', 'Contact', 'xero_primary_contact_c DESC, last_name ASC,first_name ASC');
 
-	$i = 1;
 	$xmlchild = '';
-	if (count($contacts) == 1) {
-		$contact = $contacts[0];
-		// echo "<pre>"; print_r($contact); die;
-		$xmlchild .= " <FirstName>" . $contact->first_name . "</FirstName>
-				<LastName>" . $contact->last_name . "</LastName>
-				<EmailAddress>" . $contact->email1 . "</EmailAddress>";
-	} else if (count($contacts) > 1) {
-		$synchTrueContacts = $accountobj->get_linked_beans('contacts', 'Contact', 'last_name ASC,first_name ASC', 0, -1, 0, 'xero_synch_c=1');
-		if (count($synchTrueContacts) == 1) {
-			$synchTrueContact = $synchTrueContacts[0];
+	if (count($contacts) > 0) {
+		$primaryContact = $contacts[0];
+		unset($contacts[0]);
+		$xmlchild .= " <FirstName>" . $primaryContact->first_name . "</FirstName>
+				<LastName>" . $primaryContact->last_name . "</LastName>
+				<EmailAddress>" . $primaryContact->email1 . "</EmailAddress>";
 
-			$xmlchild .= " <FirstName>" . $synchTrueContact->first_name . "</FirstName>
-					<LastName>" . $synchTrueContact->last_name . "</LastName>
-					<EmailAddress>" . $synchTrueContact->email1 . "</EmailAddress>";
-		} else {
-			$synchTrueContact = $contacts[0];
-
-			$xmlchild .= " <FirstName>" . $synchTrueContact->first_name . "</FirstName>
-					<LastName>" . $synchTrueContact->last_name . "</LastName>
-					<EmailAddress>" . $synchTrueContact->email1 . "</EmailAddress>";
-		}
 		$xmlchild .= "<ContactPersons>";
-		foreach ($contacts as $contact) {
-			// if ($i == 1) {
-			// 	$xmlchild .= " <FirstName>" . $contact->first_name . "</FirstName>
-			// 	<LastName>" . $contact->last_name . "</LastName>
-			// 	<EmailAddress>" . $contact->email1 . "</EmailAddress>";
-			// } else {
-			// if ($i == 2) {
-
-			// }
-			if ($synchTrueContact->first_name == $contact->first_name && $synchTrueContact->last_name == $contact->last_name) {
-				continue;
-			}
+		foreach ($contacts as $key => $contact) {
 			$xmlchild .= "<ContactPerson>
-								 <FirstName>" . $contact->first_name . "</FirstName>
-								<LastName>" . $contact->last_name . "</LastName>
-								<EmailAddress>" . $contact->email1 . "</EmailAddress>
-							</ContactPerson>
-									";
-			// }
-			$i++;
-			if ($i >= 6)
+						<FirstName>" . $contact->first_name . "</FirstName>
+						<LastName>" . $contact->last_name . "</LastName>
+						<EmailAddress>" . $contact->email1 . "</EmailAddress>
+					</ContactPerson>";
+		if ($key == 5)
 				break;
 		}
-		// if ($i > 2) {
 		$xmlchild .= "</ContactPersons>";
-		// }
 	}
-	// echo print_r($xmlchild);exit;
+	
 	$xml = "<Contacts>
 			 <Contact>
 				<ContactID>" . $account_id . "</ContactID>
