@@ -85,6 +85,8 @@ if (isset($_REQUEST['wipe'])) {
 				$Total							=			$Invoice->Total;
 				$Type							=			'';
 				$Type							=			$Invoice->Type;
+				$ExpCode						=			'';
+				$ExpCode						=    		$Invoice->LineItems->LineItem->AccountCode;
 				$XeroInvoiceID					=			'';
 				$XeroInvoiceID					=    		$Invoice->InvoiceID;
 				$InvoiceNumber					=			'';
@@ -116,12 +118,14 @@ if (isset($_REQUEST['wipe'])) {
 					$Invoicebean->due_date			=    		date("Y-m-d", strtotime($DueDate));
 				$Invoicebean->status			=    		$Status;
 				if ($Type == 'ACCREC') {
-					$Invoicebean->type_c		=    		'ACCREC';
-					$Invoicebean->name			=    		$InvoiceNumber;
-					$stat						=			'AccountsReceivable';
+						$Invoicebean->type_c		=    		'ACCREC';
+						$Invoicebean->xero_expense_codes_c =    'ACCREC_'.$ExpCode;
+						$Invoicebean->name			=    		$InvoiceNumber;
+						$stat						=			'AccountsReceivable';
 				}
 				if ($Type == 'ACCPAY') {
 					$Invoicebean->type_c		=    		'ACCPAY';
+					$Invoicebean->xero_expense_codes_c =    'ACCPAY_'.$ExpCode;
 					$stat						=			'AccountsPayable';
 				}
 				$Invoicebean->total_amt			=			$SubTotal;
