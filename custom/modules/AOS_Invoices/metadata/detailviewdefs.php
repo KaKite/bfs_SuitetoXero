@@ -140,12 +140,12 @@ $viewdefs[$module_name] =
             0 =>
             array(
               'name' => 'xero_synch_c',
+			  'label' => 'LBL_XERO_SYNCH',
             ),
             1 =>
             array(
-              'name' => 'xero_link_c',
-              'label' => 'LBL_XERO_LINK',
-              'customCode' => '{if $fields.xero_link_c.value != "" }<a target="_blank" href="{$fields.xero_link_c.value}"><img style="height:25px;" src="custom/logo-xero-blue.svg" alt="Xero Link" title="Go to Xero record"/></a>{/if}'
+              'name' => 'xero_expense_codes_c',
+              'label' => 'LBL_XERO_EXPENSE_CODES',
             ),
           ),
           5 =>
@@ -157,8 +157,9 @@ $viewdefs[$module_name] =
             ),
             1 =>
             array(
-              'name' => 'xeroutc_c',
-              'label' => 'LBL_XEROUTC',
+              'name' => 'xero_link_c',
+              'label' => 'LBL_XERO_LINK',
+              'customCode' => '{if $fields.xero_link_c.value != "" }<a target="_blank" href="{$fields.xero_link_c.value}"><img style="height:25px;" src="custom/logo-xero-blue.svg" alt="Xero Link" title="Go to Xero record"/></a>{/if}'
             ),
           ),
           6 =>
