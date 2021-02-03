@@ -118,7 +118,7 @@ class BfsSuitetoXeroHook
             $this->writeLogger($this->XeroOAuth->response['response']);
             $refresh_token = $this->XeroOAuth->response['response']['refresh_token'];
             if (empty($refresh_token)) {
-                $this->writeLogger('suiteToXeroScheduler ====> Some error has been occured on fetching Refresh Token.');
+                $this->writeLogger('suiteToXeroScheduler ====> An error has occured on fetching your Xero Refresh Token.');
                 return false;
             }
 
@@ -538,12 +538,12 @@ class BfsSuitetoXeroHook
         $Invoicebean->name            =            $InvoiceNumber;
         if ($Type == 'ACCREC') {
             $Invoicebean->type_c        =            'ACCREC';
-            $Invoicebean->xero_expense_codes_c =    '';
+            $Invoicebean->xero_expense_codes_c =    'ACCREC_'.$ExpCode;
             $stat                        =            'AccountsReceivable';
         }
         if ($Type == 'ACCPAY') {
             $Invoicebean->type_c        =            'ACCPAY';
-            $Invoicebean->xero_expense_codes_c =    $ExpCode;
+            $Invoicebean->xero_expense_codes_c =    'ACCPAY_'.$ExpCode;
             $stat                        =            'AccountsPayable';
         }
         $Invoicebean->total_amt            =            $SubTotal;
@@ -1031,15 +1031,8 @@ class BfsSuitetoXeroHook
             $currency_name = $Currency->iso4217;
         }
         /* end of currency iso4217 code */
-        if ($Type == '') {
-            $Type = 'ACCREC';
-        }
-        if ($Type == 'ACCREC') {
-            $ExpCode = '200';
-        } else {
-            $ExpCode = $bean->xero_expense_codes_c;
-            $Reference = $bean->name;
-        }
+		$ExpCode = substr($bean->xero_expense_codes_c, -3);
+        $Reference = $bean->name;
         $Status = $bean->status;
         $XeroAccepStatus = ['DRAFT', 'SUBMITTED', 'AUTHORISED'];
 		$Status = strtoupper($Status);

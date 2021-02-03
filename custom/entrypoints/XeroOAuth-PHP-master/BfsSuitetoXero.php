@@ -804,12 +804,12 @@ class BfsSuitetoXero
         $Invoicebean->name            =            $InvoiceNumber;
         if ($Type == 'ACCREC') {
             $Invoicebean->type_c        =            'ACCREC';
-            $Invoicebean->xero_expense_codes_c =    '';
+            $Invoicebean->xero_expense_codes_c =    'ACCREC_'.$ExpCode;
             $stat                        =            'AccountsReceivable';
         }
         if ($Type == 'ACCPAY') {
             $Invoicebean->type_c        =            'ACCPAY';
-            $Invoicebean->xero_expense_codes_c =    $ExpCode;
+            $Invoicebean->xero_expense_codes_c =    'ACCPAY_'.$ExpCode;
             $stat                        =            'AccountsPayable';
         }
         $Invoicebean->total_amt            =            $SubTotal;
