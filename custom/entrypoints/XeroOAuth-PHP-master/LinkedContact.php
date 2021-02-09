@@ -52,7 +52,8 @@ class LinkedContact
 
             $contactobj->first_name = $Contact->FirstName;
             $contactobj->last_name = $Contact->LastName;
-            // $contactobj->email = $Contact->EmailAddress;
+			$contactobj->xero_primary_contact_c = 1;
+			$contactobj->xero_link_c = "https://go.xero.com/Contacts/View/" . $Contact->ContactID;            
             $contactobj->dtime_synched_c = $this->nowDb();
             $contactobj->xero_synch_c = 1;
             $contactobj->save();
@@ -69,15 +70,16 @@ class LinkedContact
         }
 
         foreach ($Contact->ContactPersons->ContactPerson as $ContactPerson) {
-            if (!empty(trim($Contact->FirstName)) ||  !empty(trim($Contact->LastName))) {
-                $primaryContactID = $this->contactNameExist($ContactPerson->FirstName . ' ' . $ContactPerson->LastName);
-                if ($primaryContactID) {
-                    $contactobj = BeanFactory::getBean('Contacts', $primaryContactID);
+            if (!empty(trim($ContactPerson->FirstName)) ||  !empty(trim($ContactPerson->LastName))) {
+                $ContactPersonID = $this->contactNameExist($ContactPerson->FirstName . ' ' . $ContactPerson->LastName);
+                if ($ContactPersonID) {
+                    $contactobj = BeanFactory::getBean('Contacts', $ContactPersonID);
                 } else {
                     $contactobj = BeanFactory::newBean('Contacts');   //Create bean  using module name
                 }
                 $contactobj->first_name = $ContactPerson->FirstName;
                 $contactobj->last_name = $ContactPerson->LastName;
+				$contactobj->xero_link_c = "https://go.xero.com/Contacts/View/" . $Contact->ContactID;
                 // $contactobj->email = (string) $ContactPerson->EmailAddress;
                 $contactobj->dtime_synched_c = $this->nowDb();
                 $contactobj->save();

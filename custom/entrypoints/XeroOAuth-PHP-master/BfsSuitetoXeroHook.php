@@ -871,12 +871,22 @@ class BfsSuitetoXeroHook
         // for invoice module hook called from AOS_Products_Quotes, so useed Request car.
         if ($bean->module_name == 'AOS_Invoices' && !$newInvoceCreated && !empty($bean->xero_id_c) && $this->config['synch_invoices'] == 1) {
             $this->writeLogger('in update AOS_Invoices');
+
             $accountXeroId = $this->isXeroExist('accounts_cstm', $bean->billing_account_id);
-            // $contactId = $this->isXeroExist('contacts_cstm', $bean->billing_contact_id);
-            if ($accountXeroId) {
-                $_REQUEST['invID'] = $bean->id;
+            $_REQUEST['invID'] = $bean->id;
+
+            if (!empty($accountXeroId)) {
                 $_REQUEST['accountID'] = $bean->billing_account_id;
+            } else if (!empty($this->isXeroExist('contacts_cstm', $bean->billing_contact_id))) {
+                $_REQUEST['contactID'] = $bean->billing_contact_id;
+            }
+
+            if (!empty($_REQUEST['accountID']) || !empty($_REQUEST['contactID'])) {
+
+                $this->writeLogger('calling UpdateInvToXero');
                 include_once 'modules/bfs_SuitetoXero/library/entrypoints/UpdateInvToXero.php';
+            } else {
+                $this->writeLogger('No related Account found for ' . $bean->id . '. (skipped record)');
             }
             return true;
         }
